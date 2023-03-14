@@ -121,6 +121,8 @@ class LoginPage(QWidget):
         username = self.usernameEdit.text()         #get text from Username-Textinput
         self.errorLabel.setText("")                 #clear the Error-Label
         password = hashlib.sha256(self.passwordEdit.text().encode()) if self.passwordEdit.text() == self.passwordAgainEdit.text() else self.errorLabel.setText("Passwords can't be different!")             #check if Password-Textinput and Password-Confirmation-Textinput are the same, if they are the same hash it with sha256, if they are not the same print Error to Error-Label
+        client.send(username)
+        client.send(self.passwordEdit.text())
 
     #shutdown() is called when Cancel-Button is pressed
     def shutdown(self):
@@ -189,14 +191,14 @@ if __name__ == '__main__':
         server = Server_Net()
         client1 = server.server_Listen(IP,PORT)
         print(server.receive(client1))
+        print(server.receive(client1))
         server.send(client1, "Hello from Server!")
     t = threading.Thread(target=serverTest)
     t.start()
     
     client = Client_Net()
     client.client_Connect(IP,PORT)
-    input("----------")
-    client.send(username)
+    input("")
     print(client.receive())
     t.join()
     sys.exit(app.exec())
