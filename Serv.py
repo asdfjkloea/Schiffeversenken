@@ -277,6 +277,33 @@ class Register_Page(QWidget):
 class enemy_Window(QWidget):
     def __init__(self, client, username):
         super().__init__()
+    
+        #CSS Styles
+        siteStyle = """ background-color: #404040;"""
+        labelStyle = """color: #e0e0e0;
+                        font-family: Arial;
+                        font-size: 20px;"""
+        editStyle = """ border-radius: 9px;
+                        background-color: #505050;
+                        color: #e5e5e5;
+                        font-family: Arial;
+                        font-size: 20px;"""
+        buttonStyle = """   color: #e0e0e0;
+                            background-color: #454545;
+                            font-family: Arial;
+                            font-size: 20px;
+                            border: 1px solid #353535;
+                            border-radius: 5px;"""
+        buttonStyle2 = """  color: #e0e0e0;
+                            background-color: #454545;
+                            font-family: Arial;
+                            font-size: 20px;
+                            border: none;
+                            border-radius: 5px;"""
+
+        errorStyle = """color: #e00000;
+                        font-family: Arial;
+                        font-size: 15px;"""
         #temp list for testing|later need users from server
         self.username = username
         self.client = client
@@ -287,16 +314,21 @@ class enemy_Window(QWidget):
         self.setWindowTitle("choose your enemy")
         layout = QGridLayout()
         self.setLayout(layout)
+        self.setStyleSheet(siteStyle)
         label = QLabel(self)
         label.setText("Playerstats are given like: username | games played | WLR       Challenge a player by clicking on the buttons.")
+        label.setStyleSheet(labelStyle)
         layout.addWidget(label,0,0,4,0,Qt.AlignmentFlag.AlignTop)
     
+    
+
         player_button = []
         for i in range(0,len(user_list),1):
             button_var = user_list[i][0]+' | '+user_list[i][1]+' | '+user_list[i][2]   
             p_button = []
             for j in range(1):     
                 button = QPushButton(button_var)
+                button.setStyleSheet(buttonStyle)
                 layout.addWidget(button,i+1,0,4,0,Qt.AlignmentFlag.AlignTop)
                 p_button.append(button)
             player_button.append(p_button)
