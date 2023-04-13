@@ -460,5 +460,3 @@ window.show()
 app.exec()
 
 """
-Schiffeversenken.py
-19 kB
