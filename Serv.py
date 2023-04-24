@@ -272,78 +272,19 @@ class Register_Page(QWidget):
     def shutdown(self):
         self.close()      #ends Program
 
-# ANCHOR enemy_Window
-
 class enemy_Window(QWidget):
     def __init__(self, client, username):
         super().__init__()
-    
-        #CSS Styles
-        siteStyle = """ background-color: #404040;"""
-        labelStyle = """color: #e0e0e0;
-                        font-family: Arial;
-                        font-size: 20px;"""
-        editStyle = """ border-radius: 9px;
-                        background-color: #505050;
-                        color: #e5e5e5;
-                        font-family: Arial;
-                        font-size: 20px;"""
-        buttonStyle = """   color: #e0e0e0;
-                            background-color: #454545;
-                            font-family: Arial;
-                            font-size: 20px;
-                            border: 1px solid #353535;
-                            border-radius: 5px;"""
-        buttonStyle2 = """  color: #e0e0e0;
-                            background-color: #454545;
-                            font-family: Arial;
-                            font-size: 20px;
-                            border: none;
-                            border-radius: 5px;"""
 
-        errorStyle = """color: #e00000;
-                        font-family: Arial;
-                        font-size: 15px;"""
-        #temp list for testing|later need users from server
-        self.username = username
-        self.client = client
-        window.close()
-        user_list = self.client.get_Players()
-        self.timer2 = QTimer()
-        self.resize(1000, 660)
-        self.setWindowTitle("choose your enemy")
-        layout = QGridLayout()
-        self.setLayout(layout)
-        self.setStyleSheet(siteStyle)
-        label = QLabel(self)
-        label.setText("Playerstats are given like: username | games played | WLR       Challenge a player by clicking on the buttons.")
-        label.setStyleSheet(labelStyle)
-        layout.addWidget(label,0,0,4,0,Qt.AlignmentFlag.AlignTop)
-    
-    
+        self.setFixedSize(356, 145)
 
-        player_button = []
-        for i in range(0,len(user_list),1):
-            button_var = user_list[i][0]+' | '+user_list[i][1]+' | '+user_list[i][2]   
-            p_button = []
-            for j in range(1):     
-                button = QPushButton(button_var)
-                button.setStyleSheet(buttonStyle)
-                layout.addWidget(button,i+1,0,4,0,Qt.AlignmentFlag.AlignTop)
-                p_button.append(button)
-            player_button.append(p_button)
-        
-        for i in range(0,len(user_list),1):
-            for j in range(1):
-                self.button = player_button[i][j]
-                self.button.clicked.connect(lambda _, x=i, y=j: self.request_player(var_list, user_list, player_button, x, y, self.timer2))
-        var_list = [user_list, player_button, layout]
-        
-        
-        self.timer2.timeout.connect(lambda : self.reload_page(var_list, p_button, user_list, player_button, self.timer2))
-        self.timer2.start(1000) #for testing after -> 10s
-        
-        
+        self.update_table(client)
+        self.timer = QTimer()
+        self.timer.timeout.connect(lambda:self.update_table(client))
+        self.timer.start(1000)  # 10 Sekunden
+
+    def on_button_clicked(self, spieler):
+        print(spieler)
 
     #function to send game request to other player
     def request_player(self, var_list, user_list, player_button, x, y, timer2):
@@ -359,136 +300,53 @@ class enemy_Window(QWidget):
         self.timer1.timeout.connect(lambda : self.enable_buttons(var_list, user_list, player_button))
         self.timer1.start(1000) #for testing after -> 10s
     
-    #function to enable buttons 10s after button was clicked
-    def enable_buttons(self, var_list, user_list, player_button):
-        for i in range(0,len(var_list[0]),1):
-            for j in range(1):
-                enbutton = var_list[1][i][j]
-                enbutton.setEnabled(True)
         self.timer1.stop()
         self.timer2.start(1000) #for testing after -> 10s
     
     #function to reload page every 10s
-    def reload_page(self, var_list, p_button, user_list, player_button, timer2):
-        for i in range(0,len(var_list[0]),1):
-            for j in range(1):
-                var_list[1][i][j].deleteLater()
-        #temp list for testing|later need users from server
-        var_list[0] = self.client.get_Players()
-        var_list[1] = []
-        for i in range(0,len(var_list[0]),1):
-            button_var = var_list[0][i][0]+' | '+var_list[0][i][1]+' | '+var_list[0][i][2]   
-            p_button = []
-            for j in range(1):     
-                button = QPushButton(button_var)
-                var_list[2].addWidget(button,i+1,0,4,0,Qt.AlignmentFlag.AlignTop)
-                p_button.append(button)
-            var_list[1].append(p_button)
-        for i in range(0,len(var_list[0]),1):
-            for j in range(1):
-                self.button = var_list[1][i][j]
-                self.button.clicked.connect(lambda _, x=i, y=j: self.request_player(var_list, user_list, player_button, x, y, self.timer2))
+    
+    def update_table(self, client):
         
+        self.client = client
+        user_list = self.client.get_Players()
+        
+        #Tabellen-Widget erstellen
+        self.table_widget = QTableWidget()
+        self.table_widget.setRowCount(len(user_list))
+        self.table_widget.setColumnCount(3)
+        self.table_widget.setHorizontalHeaderLabels(["Spieler", "Anzahl der Spiele", "Win-Loss-Ratio"])
+        self.table_widget.horizontalHeaderItem(0).setTextAlignment(4)
+        self.table_widget.horizontalHeaderItem(1).setTextAlignment(4)
+        self.table_widget.horizontalHeaderItem(2).setTextAlignment(4)
 
+        # Spieler-Statistik in Tabelle einfügen
+        row = 0
+        for i in range(0,len(user_list),1):
+            name_var = user_list[i][0]
+            print(type(user_list[i][1]))
+            print(type(user_list[i][2]))
+            button = QPushButton(name_var)
+            button.setStyleSheet("background-color: #454545; color: #e0e0e0;")
+            button.clicked.connect(lambda checked, s=i: self.on_button_clicked(s))
+            self.table_widget.setCellWidget(row, 0, button)
+            self.table_widget.setItem(row, 1, QTableWidgetItem(str(user_list[i][1])))
+            self.table_widget.item(row, 1).setTextAlignment(4) # zentriert ausrichten
+            self.table_widget.setItem(row, 2, QTableWidgetItem(str(user_list[i][2])))
+            self.table_widget.item(row, 2).setTextAlignment(4) # zentriert ausrichten
+            row += 1
+
+        # Layout erstellen und Tabelle hinzufügen
+        layout = QVBoxLayout()
+        layout.addWidget(self.table_widget)
+        self.setLayout(layout)
+
+        # Farben setzen
+        self.setStyleSheet("background-color: #454545; color: #e0e0e0;")
+        self.table_widget.setStyleSheet("alternate-background-color: #333333; background-color: #454545; color: #e0e0e0;")
+
+        print("reloaded")
 
 app = QApplication(sys.argv)
 window = Login_Page()
 window.show()
 sys.exit(app.exec())
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-"""
-import Network
-import sys
-from PyQt6.QtCore import QSize
-from PyQt6.QtWidgets import QLineEdit, QApplication, QMainWindow, QGridLayout, QLabel, QWidget, QPushButton, QMessageBox
-
-
-class Widget(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        #Layout erstellen
-        layout = QGridLayout(self)
-        #Fenstergröße definieren
-        self.setFixedSize(QSize(300, 200))
-
-        self.network = Network.Client_Net()
-        self.network.client_Connect("127.0.0.1", 44444)
-
-        #Die Felder erstellen
-        name_text = QLabel("Name: ", self)
-        self.name = QLineEdit(self)
-        pwd_text_1 = QLabel("Passwort: ", self)
-        pwd_text_2 = QLabel("Passwort (Wiederholung): ", self)
-        self.pwd1 = QLineEdit(self)
-        self.pwd2 = QLineEdit(self)
-        button_ok = QPushButton("Ok", self)
-        button_abbrechen = QPushButton("Abbrechen", self)
-
-        #Die passwörter verdecken
-        self.pwd1.setEchoMode(QLineEdit.EchoMode.Password)
-        self.pwd2.setEchoMode(QLineEdit.EchoMode.Password)
-
-        #den Buttons Funktionen zuweisen
-        button_ok.clicked.connect(self.check)
-        button_abbrechen.clicked.connect(self.exit)
-
-        #die Felder dem Layout zuweisen
-        layout.addWidget(name_text, 0, 0)
-        layout.addWidget(self.name, 0, 1)
-        layout.addWidget(pwd_text_1, 2, 0)
-        layout.addWidget(pwd_text_2, 3, 0)
-        layout.addWidget(self.pwd1, 2, 1)
-        layout.addWidget(self.pwd2, 3, 1)
-        layout.addWidget(button_ok, 4, 0)
-        layout.addWidget(button_abbrechen, 4, 1)
-
-        #das Layout dem Fenster zuweisen
-        widget = QWidget()
-        widget.setLayout(layout)
-        self.setCentralWidget(widget)
-    
-    #Funktion zum checken der Eingabe und Öffnen einer Message-Box
-    def check(self):
-        if(self.name.text() == "" or self.pwd1.text() == "" or self.pwd1.text() != self.pwd2.text()):
-            box = QMessageBox(self)
-            box.setText("Inkorrekte Eingabe!")
-            box.exec()
-        else:
-            self.network.send(f"{self.name.text()};{self.pwd1.text()}")
-            box = QMessageBox(self)
-            box.setText("Sie haben sich erfolgreich eingeloggt!")
-            box.exec()
-
-    #Funktion zum Schließen des Fensters
-    def exit(self):
-        self.destroy()
-
-
-
-app = QApplication(sys.argv)
-window = Widget()
-window.show()
-app.exec()
-
-"""

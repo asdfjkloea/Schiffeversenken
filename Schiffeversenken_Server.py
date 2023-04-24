@@ -13,7 +13,7 @@ def user_pw_übergeben(benutzer, passwort):
     return True
 
 def get_user_online():
-    return [["johannes",23,50],["sandro",50,0]]
+    return [["johannes",23,50],["elias",10,0],["jönsn",23,50],["luca",1,1]]
 
 def check_passwort(benutzer, passwort):
     return True
