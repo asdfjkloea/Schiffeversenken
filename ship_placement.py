@@ -85,33 +85,35 @@ class ship_placement(QWidget):
         for i in range(0,10,1):
             for j in range(0,10,1):
                 field_button = field_buttons[i][j]
-                field_button.clicked.connect(lambda _, x=i, y=j: self.try_place(x, y, field_buttons, pl_field, cur_placing, rot_list, cur, ships_placed, done_lab, show_ship_label))
+                field_button.clicked.connect(lambda _, x=i, y=j: self.try_place(x, y, field_buttons, pl_field, cur_placing, rot_list, ships_placed, done_lab, show_ship_label))
         
         #button to reset field
         reset_button = QPushButton('reset')
         layout.addWidget(reset_button,0,11,1,4)
-        reset_button.clicked.connect(lambda : self.reset_field(layout, cur_placing, rot_list, cur, ship_buttons, ships_placed, done_lab, show_ship_label))
- 
+        reset_button.clicked.connect(lambda : self.reset_field(layout, cur_placing, rot_list, ship_buttons, ships_placed, done_lab, show_ship_label))
+
+        #time left to place ship
+        timer_cnt = [120]
+        label_time = QLabel(self)
+        label_time.setText("Seconds left: {}".format(timer_cnt[0]))
+        layout.addWidget(label_time,2,11,1,4,Qt.AlignmentFlag.AlignCenter)
+        self.placement_timer = QTimer()
+        self.placement_timer.timeout.connect(lambda : self.place_timer(timer_cnt, label_time))
+        self.placement_timer.start(1000)
+
         #ships [name, width, length]
         ship_list = [['s1','1','2'],['s2','1','3'],['s3','1','4'],['s4','1','5'],['s5','2','3'],['s6','2','4'],['s7','2','5']]
         #list from server with index ||| set now for testing !!!!!
         ran_ships = [0, 2, 3, 5, 6]
 
         rot_list = ['horizontal']
-        #rotation info for user
-        rot_lab = QLabel(self)
-        rot_lab.setText("current rotation: {}".format(rot_list[0]))
-        layout.addWidget(rot_lab,1,11,Qt.AlignmentFlag.AlignCenter)
         #button to rotate ship
         rot_but = QPushButton('rotate ship')
-        layout.addWidget(rot_but,2,11,1,4)
-        rot_but.clicked.connect(lambda : self.rotate_ship(rot_list, rot_lab, cur_placing, show_ship_label, visual_ship))
+        layout.addWidget(rot_but,3,11,1,4)
+        rot_but.clicked.connect(lambda : self.rotate_ship(rot_list, cur_placing, show_ship_label, visual_ship))
 
         #info for user on selected ship
         cur_placing = [' ', 0, 0, 0] #[name, length, width, (button)]
-        cur = QLabel(self)
-        cur.setText("currently placing: {}".format(cur_placing[0]))
-        layout.addWidget(cur,3,11)
 
         #buttons to select which ship to place
         ship_buttons = []
@@ -122,7 +124,7 @@ class ship_placement(QWidget):
         print(ship_buttons)
         for i in range(0,5,1):
             ship = ship_buttons[i]
-            ship.clicked.connect(lambda _, x=i: self.selected_ship(x, ship_list, cur_placing, cur, ran_ships, ship_buttons, rot_list, show_ship_label, visual_ship))
+            ship.clicked.connect(lambda _, x=i: self.selected_ship(x, ship_list, cur_placing, ran_ships, ship_buttons, rot_list, show_ship_label, visual_ship))
             print(ship)
         
         #done
@@ -149,26 +151,24 @@ class ship_placement(QWidget):
     
 
     #rotate ship
-    def rotate_ship(self, rot_list, rot_lab, cur_placing, show_ship_label, visual_ship):
+    def rotate_ship(self, rot_list, cur_placing, show_ship_label, visual_ship):
         if (rot_list[0] == 'horizontal'):
             rot_list[0] = 'vertical'
         else:
             rot_list[0] = 'horizontal'
-        rot_lab.setText("current rotation: {}".format(rot_list[0]))
         visual_ship(cur_placing, rot_list, show_ship_label)
 
     
     #info to which ship is selected
-    def selected_ship(self, x, ship_list, cur_placing, cur, ran_ships, ship_buttons, rot_list, show_ship_label, visual_ship):
+    def selected_ship(self, x, ship_list, cur_placing, ran_ships, ship_buttons, rot_list, show_ship_label, visual_ship):
         cur_placing[0] = ship_list[ran_ships[x]][0]
-        cur.setText("currently placing: {}".format(cur_placing[0]))
         cur_placing[1] = ship_list[ran_ships[x]][2]
         cur_placing[2] = ship_list[ran_ships[x]][1]
         cur_placing[3] = ship_buttons[x]
         visual_ship(cur_placing, rot_list, show_ship_label)
 
     #reset the field if u wanna replace ships   
-    def reset_field(self, layout, cur_placing, rot_list, cur, ship_buttons, ships_placed, done_lab, show_ship_label):
+    def reset_field(self, layout, cur_placing, rot_list, ship_buttons, ships_placed, done_lab, show_ship_label):
         print('reset')
         pl_field = []
         field_buttons = []
@@ -187,7 +187,7 @@ class ship_placement(QWidget):
         for i in range(0,10,1):
             for j in range(0,10,1):
                 field_button = field_buttons[i][j]
-                field_button.clicked.connect(lambda _, x=i, y=j: self.try_place(x, y, field_buttons, pl_field, cur_placing, rot_list, cur, ships_placed, done_lab, show_ship_label))
+                field_button.clicked.connect(lambda _, x=i, y=j: self.try_place(x, y, field_buttons, pl_field, cur_placing, rot_list, ships_placed, done_lab, show_ship_label))
         for i in range(0,5,1):
             ship = ship_buttons[i]
             ship.setEnabled(True)
@@ -197,7 +197,7 @@ class ship_placement(QWidget):
              
 
     #check if able to place ship
-    def try_place(self, x, y, field_buttons, pl_field, cur_placing, rot_list, cur, ships_placed, done_lab, show_ship_label):
+    def try_place(self, x, y, field_buttons, pl_field, cur_placing, rot_list, ships_placed, done_lab, show_ship_label):
         selected_ship = cur_placing[3]
         width = int(cur_placing[2])
         length = int(cur_placing[1])
@@ -302,7 +302,6 @@ class ship_placement(QWidget):
                 print(ships_placed[0])
                 if (ships_placed[0] == 5):
                     done_lab.setText("done placing all ships")
-                cur.setText("currently placing: {}".format(cur_placing[0]))
                 print(pl_field)
 
              
@@ -310,6 +309,16 @@ class ship_placement(QWidget):
         reset_button.setEnabled(False)
         if (ships_placed[0] == 5):
             print('done') #go on later
+    
+    def place_timer(self, timer_cnt, label_time):
+        timer_cnt[0] -= 1
+        label_time.setText("Seconds left: {}".format(timer_cnt[0]))
+        print(timer_cnt)
+        if(timer_cnt[0] == 0):
+            print('time over')
+            self.placement_timer.stop()
+            #send time over to server and go back to enemy window !!!
+
 
     
 
