@@ -306,6 +306,7 @@ class enemy_Window(QWidget):
         
         #Tabellen-Widget erstellen
         self.table_widget = QTableWidget()
+        self.table_widget.setEditTriggers(QTableWidget.EditTrigger(False))
         self.table_widget.setRowCount(len(user_list))
         self.table_widget.setColumnCount(3)
         self.table_widget.setHorizontalHeaderLabels(["Spieler", "Anzahl der Spiele", "Win-Loss-Ratio"])
@@ -322,7 +323,7 @@ class enemy_Window(QWidget):
             print(type(user_list[i][2]))
             button = QPushButton(name_var)
             button.setStyleSheet("background-color: #454545; color: #e0e0e0;")
-            button.clicked.connect(lambda checked, s=i: self.on_button_clicked(s, button_list, timer_disable))
+            button.clicked.connect(lambda s=i: self.on_button_clicked(s, button_list, timer_disable))
             button_list.append(button)
             self.table_widget.setCellWidget(row, 0, button)
             self.table_widget.setItem(row, 1, QTableWidgetItem(str(user_list[i][1])))
@@ -339,7 +340,7 @@ class enemy_Window(QWidget):
 
         # Farben setzen
         self.setStyleSheet("background-color: #454545; color: #e0e0e0;")
-        self.table_widget.setStyleSheet("QHeaderView::section { background-color:#333333 }alternate-background-color: #333333; background-color: #454545; color: #e0e0e0;")
+        self.table_widget.setStyleSheet("QHeaderView::section { background-color:#333333 } QTableCornerButton::section { background-color:#333333 } alternate-background-color: #333333; background-color: #454545; color: #e0e0e0;")
 
         print("reloaded")
 
