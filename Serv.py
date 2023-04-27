@@ -339,7 +339,7 @@ class enemy_Window(QWidget):
 
         # Farben setzen
         self.setStyleSheet("background-color: #454545; color: #e0e0e0;")
-        self.table_widget.setStyleSheet("alternate-background-color: #333333; background-color: #454545; color: #e0e0e0;")
+        self.table_widget.setStyleSheet("QHeaderView::section { background-color:#333333 }alternate-background-color: #333333; background-color: #454545; color: #e0e0e0;")
 
         print("reloaded")
 
