@@ -2,6 +2,7 @@ from PyQt6.QtWidgets import *
 from PyQt6.QtCore import *
 import sys
 import Network
+import time
 
 #temp list for testing
 user_info =['user','342','30']
@@ -277,36 +278,29 @@ class enemy_Window(QWidget):
         super().__init__()
 
         self.setFixedSize(356, 145)
-
+        
         self.update_table(client)
         self.timer = QTimer()
-        self.timer.timeout.connect(lambda:self.update_table(client))
-        self.timer.start(1000)  # 10 Sekunden
+        self.timer.timeout.connect(lambda :self.update_table(client))
+        self.timer.start(10000)  # 10 Sekunden
 
-    def on_button_clicked(self, spieler):
+    def on_button_clicked(self, spieler, button_list, timer_disable):
         print(spieler)
+        for i in range(0,len(button_list),1):
+            button = button_list[i]
+            button.setEnabled(False)
+            timer_disable.start(10000)
+            timer_disable.timeout.connect(lambda:self.button_enable(button_list, timer_disable))
+    
+    def button_enable(self, button_list, timer_disable): 
+        for i in range(0,len(button_list),1):
+            button = button_list[i]
+            button.setEnabled(True)
+        timer_disable.stop()
 
-    #function to send game request to other player
-    def request_player(self, var_list, user_list, player_button, x, y, timer2):
-        user = var_list[0][x][y]
-        print(user) #test
-        self.client.request_player(user)
-        for i in range(0,len(var_list[0]),1):
-            for j in range(1):
-                disbutton = var_list[1][i][j]
-                disbutton.setEnabled(False)
-        self.timer2.stop()
-        self.timer1 = QTimer()
-        self.timer1.timeout.connect(lambda : self.enable_buttons(var_list, user_list, player_button))
-        self.timer1.start(1000) #for testing after -> 10s
-    
-        self.timer1.stop()
-        self.timer2.start(1000) #for testing after -> 10s
-    
     #function to reload page every 10s
-    
     def update_table(self, client):
-        
+        timer_disable = QTimer()
         self.client = client
         user_list = self.client.get_Players()
         
@@ -321,19 +315,22 @@ class enemy_Window(QWidget):
 
         # Spieler-Statistik in Tabelle einfügen
         row = 0
+        button_list = []
         for i in range(0,len(user_list),1):
             name_var = user_list[i][0]
             print(type(user_list[i][1]))
             print(type(user_list[i][2]))
             button = QPushButton(name_var)
             button.setStyleSheet("background-color: #454545; color: #e0e0e0;")
-            button.clicked.connect(lambda checked, s=i: self.on_button_clicked(s))
+            button.clicked.connect(lambda checked, s=i: self.on_button_clicked(s, button_list, timer_disable))
+            button_list.append(button)
             self.table_widget.setCellWidget(row, 0, button)
             self.table_widget.setItem(row, 1, QTableWidgetItem(str(user_list[i][1])))
             self.table_widget.item(row, 1).setTextAlignment(4) # zentriert ausrichten
             self.table_widget.setItem(row, 2, QTableWidgetItem(str(user_list[i][2])))
             self.table_widget.item(row, 2).setTextAlignment(4) # zentriert ausrichten
             row += 1
+
 
         # Layout erstellen und Tabelle hinzufügen
         layout = QVBoxLayout()
@@ -345,6 +342,7 @@ class enemy_Window(QWidget):
         self.table_widget.setStyleSheet("alternate-background-color: #333333; background-color: #454545; color: #e0e0e0;")
 
         print("reloaded")
+
 
 app = QApplication(sys.argv)
 window = Login_Page()
