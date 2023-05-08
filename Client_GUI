@@ -1,0 +1,165 @@
+import sys
+from PyQt6.QtWidgets import (QWidget, QLabel, QLineEdit, 
+        QTextEdit, QGridLayout, QVBoxLayout, QApplication,QPushButton,QSizePolicy,QButtonGroup)
+from PyQt6.QtCore import Qt,QBasicTimer
+import time
+
+hitlist = []
+pl_field = [['X', 'X', 'X', ' ', ' ', ' ', ' ', ' ', ' ', ' '], [' ', ' ', 's7', 's7', 's7', 's7', 's7', ' ', ' ', ' '], [' ', ' ', 's7', 's7', 's7', 's7', 's7', ' ', ' ', ' '], [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], [' ', ' ', ' ', ' ', 's1', 's1', ' ', ' ', ' ', ' '], [' ', ' ', ' ', ' ', ' ', ' ', 's3', 's3', 's3', 's3'], [' ', 's4', 's4', 's4', 's4', 's4', ' ', ' ', ' ', ' '], [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], [' ', ' ', ' ', ' ', ' ', ' ', 'X', 'X', 'X', 'X'], [' ', ' ', ' ', ' ', ' ', ' ', 's6', 's6', 's6', 'X']]
+button_lock = [[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']]
+
+class Window(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+        
+    def initUI(self):
+        self.counter = 0
+        self.lock7 = False
+        self.lock6 = False
+        self.lock5 = False
+        self.lock4 = False
+        self.lock3 = False
+        self.lock2 = False
+        self.lock1 = False
+
+
+        vbox = QVBoxLayout()
+        grid = QGridLayout()
+        grid.setSpacing(1)
+        grid2 = QGridLayout()
+        grid2.setSpacing(1)
+        self.setLayout(vbox)
+
+        # Add infobox 
+        self.infobox = QLabel("You have hit: 0 ships")
+        self.infobox.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        self.infobox.setAlignment(Qt.AlignmentFlag.AlignRight)
+        vbox.addWidget(self.infobox)
+
+        vbox.addLayout(grid)
+        vbox.addLayout(grid2)
+        self.buttongroup = QButtonGroup()
+
+
+        for i in range(2):
+            for y in range(10):
+                yfront = QLabel(chr(y+65))
+                yfront.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                yfront.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+                if(i == 0):
+                    grid2.addWidget(yfront, y+1,0)
+                else:
+                    grid.addWidget(yfront, y+1,0)
+
+            for x in range(10):
+                xfront = QLabel(str(x+1))
+                xfront.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                xfront.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+                if(i == 0):
+                    grid2.addWidget(xfront, 0,x+1)
+                else:
+                    grid.addWidget(xfront, 0,x+1)
+
+        #Ships destroy counter
+        #Shots fired Counter
+        for y in range(10):
+            for x in range(10):
+                Widget = QLabel('-')
+                Widget.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                Widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+                grid.addWidget(Widget, x+1, y+1)
+
+        for y in range(10):
+            for x in range(10):
+                button = QPushButton(str((y+1)+x*10))
+                button.setChecked(True)
+                button.clicked.connect(self.the_button_was_clicked)
+                button.setStyleSheet("background-color: blue;")
+                button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+                grid2.addWidget(button,x+1,y+1)
+                self.buttongroup.addButton(button,y*x)
+
+        self.resize(1000, 800)
+        self.setWindowTitle('Hahah no looki here!')
+        self.show()
+        
+    def the_button_was_clicked(self):
+        Numbers = []
+        
+        sender_button = self.sender()
+        button_number = int(sender_button.text())
+
+        if(button_number < 11): #For single number
+            Numbers = [0, button_number]
+        elif(button_number >= 11):   #for multi number
+            for i in str(button_number-1):
+                Numbers.append(int(i))
+        
+        #client.send(Numbers)
+
+        #hitlist = server.receive()
+        elif(hitlist[1] == 1):
+            sender_button.setStyleSheet("background-color: red;") #HIZ SHIPZ
+        elif(hitlist[1] == 0):
+            sender_button.setStyleSheet("background-color: cyan;") #WATER
+        sender_button.setEnabled(False)
+
+        # Check if there are any "S7" 
+        for row in pl_field:
+            if 's7' not in row and self.lock7 == False:
+                count = True
+            if 's6' not in row and self.lock6 == False:
+                count = True
+            if 's5' not in row and self.lock5 == False:
+                count = True
+            if 's4' not in row and self.lock4 == False:
+                count = True
+            if 's3' not in row and self.lock3 == False:
+                count = True
+            if 's2' not in row and self.lock2 == False:
+                count = True
+            if 's1' not in row and self.lock1 == False:
+                count = True
+            else:
+                count = False
+                break
+
+        print(self.counter)
+        if(count == True):
+            self.counter += 1
+            count = False
+            for row in pl_field:
+                if 's7' not in row and self.lock7 == False:
+                    self.lock7 = True
+            for row in pl_field:
+                if 's6' not in row and self.lock6 == False:
+                    self.lock7 = True
+            for row in pl_field:
+                if 's5' not in row and self.lock5 == False:
+                    self.lock7 = True
+            for row in pl_field:
+                if 's4' not in row and self.lock4 == False:
+                    self.lock7 = True
+            for row in pl_field:
+                if 's3' not in row and self.lock3 == False:
+                    self.lock7 = True
+            for row in pl_field:
+                if 's2' not in row and self.lock2 == False:
+                    self.lock7 = True
+            for row in pl_field:
+                if 's1' not in row and self.lock1 == False:
+                    self.lock7 = True
+
+        self.infobox.setText("You have hit: {} ships".format(str(self.counter)))
+        
+
+
+def main():
+    app = QApplication(sys.argv)
+    ex = Window()
+    sys.exit(app.exec())
+
+
+if __name__ == '__main__':
+    main()
