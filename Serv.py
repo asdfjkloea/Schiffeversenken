@@ -277,8 +277,7 @@ class enemy_Window(QWidget):
     def __init__(self, client, username):
         super().__init__()
 
-        self.setFixedSize(356, 145)
-        
+        self.setFixedSize(356, 145)#356,145
         self.update_table(client)
         self.timer = QTimer()
         self.timer.timeout.connect(lambda :self.update_table(client))
@@ -313,17 +312,15 @@ class enemy_Window(QWidget):
         self.table_widget.horizontalHeaderItem(0).setTextAlignment(4)
         self.table_widget.horizontalHeaderItem(1).setTextAlignment(4)
         self.table_widget.horizontalHeaderItem(2).setTextAlignment(4)
-
         # Spieler-Statistik in Tabelle einfügen
         row = 0
         button_list = []
+
         for i in range(0,len(user_list),1):
             name_var = user_list[i][0]
-            print(type(user_list[i][1]))
-            print(type(user_list[i][2]))
             button = QPushButton(name_var)
             button.setStyleSheet("background-color: #454545; color: #e0e0e0;")
-            button.clicked.connect(lambda s=i: self.on_button_clicked(s, button_list, timer_disable))
+            button.clicked.connect(lambda: self.on_button_clicked(name_var, button_list, timer_disable))
             button_list.append(button)
             self.table_widget.setCellWidget(row, 0, button)
             self.table_widget.setItem(row, 1, QTableWidgetItem(str(user_list[i][1])))
@@ -331,7 +328,7 @@ class enemy_Window(QWidget):
             self.table_widget.setItem(row, 2, QTableWidgetItem(str(user_list[i][2])))
             self.table_widget.item(row, 2).setTextAlignment(4) # zentriert ausrichten
             row += 1
-
+        
 
         # Layout erstellen und Tabelle hinzufügen
         layout = QVBoxLayout()
